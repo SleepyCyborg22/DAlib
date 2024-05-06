@@ -25,7 +25,7 @@ class Graph:
 
         for i in range(self.n - 2) :
             pruferSequence.append(random.randint(0, self.n-1))
-            print(pruferSequence[i])
+            # print(pruferSequence[i])
             cnt[pruferSequence[i]] += 1
 
         heap = []
@@ -48,7 +48,7 @@ class Graph:
         adjList[self.n-1].append(z)
         adjList[z].append(self.n-1)
 
-        print(adjList)
+        # print(adjList)
 
         for i in range(self.n):
             self.nodes[i].edges = adjList[i]
@@ -65,15 +65,57 @@ class Graph:
                 byzantine[i] = 1
                 byz -= 1
 
-        for i in range(k):
-            tempAgent = agent.Agent(i+1, byzantine[i] == 1)
-            self.agents.append(tempAgent)
-
         temp = []
-        for i in range(self.n):
-            temp.append(i+1)
+        for i in range(k):
+            tempAgent = agent.Agent(i, byzantine[i] == 1)
+            self.agents.append(tempAgent)
+            temp.append(i)
 
         self.nodes[root].agents = temp
-        print(root, temp, byzantine)
+
+        return
+    
+
+    def roundStartInformation(self):
+        for i in range(self.n):
+            deg = len(self.nodes[i].edges)
+            agentsOnNode = self.nodes[i].agents
+            print(i, agentsOnNode)
+            for j in range(len(agentsOnNode)):
+                self.agents[agentsOnNode[j]].currNodeDegree = deg
+                self.agents[agentsOnNode[j]].collocAgents = agentsOnNode
+        return
+    
+    def communication(self):
+        for i in range(self.n):
+            msg = {}
+            agentsArr = self.nodes[i].agents
+            for j in range(len(agentsArr)):
+                currAgent = self.agents[agentsArr[j]]
+                msg[str(currAgent.id)] = currAgent.sentMsg
+            for j in range(len(agentsArr)):
+                self.agents[agentsArr[j]].recMsg = msg
+        return
+
+    def nxtRound(self):
+        nxtNodes = []
+        for i in range(self.n):
+            nxtNodes.append([])
+        for i in range(self.n):
+            agentsArr = self.nodes[i].agents
+            for j in range(len(agentsArr)):
+                nxt = self.agents[agentsArr[j]].chosenPort
+                if (nxt == -1) :
+                    nxtNodes[i].append(agentsArr[j])
+                else:
+                    temp = self.nodes[i].edges[nxt]
+                    nxtNodes[temp].append(agentsArr[j])
+                    for k in range(len(self.nodes[temp].edges)):
+                        if (self.nodes[temp].edges[k] == i):
+                            self.agents[agentsArr[j]].enteredThrough = k
+                            break
+        
+        for i in range(self.n):
+            self.nodes[i].agents = nxtNodes[i]
 
         return
