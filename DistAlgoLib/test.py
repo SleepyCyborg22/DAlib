@@ -28,7 +28,10 @@ for rnds in range(100):
         if (chosenPortNum == deg):
             chosenPortNum = -1
         G.agents[i].chosenPort = chosenPortNum
+        print(G.agents[i].sentMsg)
 
     G.nxtRound()
+
+    
 
     print('--------------------------------------------------------------------')

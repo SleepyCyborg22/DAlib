@@ -80,7 +80,7 @@ class Graph:
         for i in range(self.n):
             deg = len(self.nodes[i].edges)
             agentsOnNode = self.nodes[i].agents
-            print(i, agentsOnNode)
+            # print(i, agentsOnNode)
             for j in range(len(agentsOnNode)):
                 self.agents[agentsOnNode[j]].currNodeDegree = deg
                 self.agents[agentsOnNode[j]].collocAgents = agentsOnNode
@@ -119,3 +119,35 @@ class Graph:
             self.nodes[i].agents = nxtNodes[i]
 
         return
+    
+    def isDispersed(self):
+        for i in range(self.n):
+            numGoodAgents = 0
+            agentsArr = self.nodes[i].agents
+            for j in range(len(agentsArr)):
+                currAgent = agentsArr[j]
+                if (not self.agents[currAgent].byzantine):
+                    if(self.agents[currAgent].active):
+                        return False
+                    numGoodAgents += 1
+            if (numGoodAgents > 1):
+                return False
+        return True
+    
+    def agentOperation(self, operation):
+        for i in range(len(self.agents)):
+            if not self.agents[i].byzantine:
+                newAgent = operation(self.agents[i])
+                self.agents[i] = newAgent
+            else:
+                newAgent = self.byzantineOperation(self.agents[i])
+                self.agents[i] = newAgent
+        return
+
+    def byzantineOperation(agent):
+        deg = agent.currNodeDegree
+        chosenPortNum = random.randint(0, deg)
+        if (chosenPortNum == deg):
+            chosenPortNum = -1
+        agent.chosenPort = chosenPortNum
+        return agent
